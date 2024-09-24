@@ -13,6 +13,8 @@ class new_attachment(Base):
     new_attachmentid = Column(String(32), primary_key=True, unique=True, default=Uuid.get_hex)
     new_name = Column(String(length=255))
     new_content = Column(LargeBinary)
+    new_content_type = Column(String(length=100))
+    new_mime_type = Column(String(length=100))
     new_createdon = Column(DateTime, default=datetime.datetime.now)
     new_modifiedon = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 

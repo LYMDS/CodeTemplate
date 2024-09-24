@@ -9,7 +9,7 @@
             <span>模板</span>
           </template>
           <el-menu-item index="/TemplateGroupList">模版组</el-menu-item>
-          <el-menu-item index="/about">连接层</el-menu-item>
+          <el-menu-item index="/about">关于</el-menu-item>
 
         </el-sub-menu>
 

@@ -10,8 +10,13 @@ function post(url, data) {
     return axios.post(this.BaseUrl + url, data);
 }
 
+function opendownload(url) {
+    window.open(BaseUrl + url, '_blank')
+}
+
 export default {
     BaseUrl,
     get,
-    post
+    post,
+    opendownload
 }

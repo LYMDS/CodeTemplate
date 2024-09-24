@@ -11,11 +11,16 @@ function post(url, data) {
 }
 
 function opendownload(url) {
-    window.open(BaseUrl + url, '_blank')
+    window.open(this.BaseUrl + url, '_blank')
 }
+
+function getBaseUrl() {
+    return this.BaseUrl;
+} 
 
 export default {
     BaseUrl,
+    getBaseUrl,
     get,
     post,
     opendownload

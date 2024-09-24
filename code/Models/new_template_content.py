@@ -15,6 +15,7 @@ class new_template_content(Base):
     new_content = Column(String(length=1000))
     new_file_name = Column(String(length=255))
     new_file_type = Column(Integer())
+    new_attachment_id = Column(String(length=32))
     new_createdon = Column(DateTime, default=datetime.datetime.now)
     new_modifiedon = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 

@@ -32,12 +32,10 @@ class AttachmentCommand(InitDataUtil):
         self.DataServer.session.commit()
         id = saveTable.new_attachmentid
         self.DataServer.session.close()
-        print(id)
         return id
 
     def download(self, id):
         data = self.DataServer.session.get(new_attachment, id)
         bytes_io = io.BytesIO(data.new_content)
         filename = data.new_name
-        print(f"download file: {filename}")
         return send_file(bytes_io, download_name=filename, mimetype=data.new_mime_type, as_attachment=True)

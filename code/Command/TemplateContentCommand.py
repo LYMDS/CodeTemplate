@@ -26,6 +26,7 @@ class TemplateContentCommand(InitDataUtil):
         saveTable.new_content = data["new_content"]
         saveTable.new_file_name = data["new_file_name"]
         saveTable.new_file_type = data["new_file_type"]
+        saveTable.new_attachment_id = data["new_attachment_id"]
 
         self.DataServer.session.commit()
         id = saveTable.new_template_contentid

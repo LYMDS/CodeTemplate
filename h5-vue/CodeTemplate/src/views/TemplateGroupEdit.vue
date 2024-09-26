@@ -110,14 +110,16 @@ function save() {
 
 
 function create() {
-    id.value = ""
-    formData.value = {
-        new_template_groupid: id.value,
-        new_name: "",
-        new_note: "",
-        new_createdon: "",
-        new_modifiedon: "",
-    }
+    // id.value = ""
+    // formData.value = {
+    //     new_template_groupid: id.value,
+    //     new_name: "",
+    //     new_note: "",
+    //     new_createdon: "",
+    //     new_modifiedon: "",
+    // }
+    // 路由跳转有问题
+    router.push("/TemplateGroupEdit");
 }
 
 /**删除 */

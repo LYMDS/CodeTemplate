@@ -38,3 +38,11 @@ class TemplateContentCommand(InitDataUtil):
     def get(self, id):
         data = self.DataServer.session.get(new_template_content, id)
         return json.dumps(to_primitive(data))
+
+    # 删除
+    def delete(self, ids):
+        self.DataServer.session.query(new_template_content).filter(
+            new_template_content.new_template_contentid.in_(ids)).delete()
+        self.DataServer.session.commit()
+        self.DataServer.session.close()
+        return ids

@@ -35,7 +35,7 @@
           />
         </el-form-item>
       </el-form>
-      <el-table
+      <el-table v-show="id"
         ref="tableRef"
         :data="tableData"
         style="width: 100%"
@@ -97,7 +97,7 @@
 import { onMounted, ref } from "vue";
 import req from "../common/interface";
 import { useRouter } from "vue-router";
-import { RefreshRight } from "@element-plus/icons-vue";
+import { RefreshRight, Plus } from "@element-plus/icons-vue";
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 
 const router = useRouter();
@@ -172,24 +172,29 @@ function save() {
 }
 
 function create() {
-  // id.value = ""
-  // formData.value = {
-  //     new_template_group_id: id.value,
-  //     new_name: "",
-  //     new_note: "",
-  //     new_createdon: "",
-  //     new_modifiedon: "",
-  // }
+  id.value = ""
+  formData.value = {
+    new_template_contentid: id.value,
+    new_template_group_id: new_template_group_id.value,
+    new_content: "",
+    new_file_name: "",
+    new_file_type: "",
+    new_createdon: "",
+    new_modifiedon: "",
+    new_attachment_id: "",
+  }
+  tableData.value = [];
+  fileList.value = [];
 }
 
 /**删除 */
 function del() {
-  // req.post("/api/new_template_group/delete/", [id.value]).then(res => {
-  //     console.log("res", res);
-  //     back();
-  // }).catch(err => {
-  //     console.error(err);
-  // });
+  req.post("/api/new_template_content/delete/", [id.value]).then(res => {
+      console.log("res", res);
+      back();
+  }).catch(err => {
+      console.error(err);
+  });
 }
 
 /**刷新明细 */
@@ -216,6 +221,35 @@ function download() {
 /**路由回退 */
 function back() {
   router.back();
+}
+
+/**跳转内容明细 */
+function dblclick(event) {
+    router.push({
+        path: "/TemplateParamEdit",
+        query: {
+            id: event.new_template_paramid,
+            new_template_group_id: new_template_group_id.value,
+            new_template_code_id: id.value
+        }
+    });
+}
+
+/**跳转内容明细 */
+function handleEdit(index, event) {
+  dblclick(event);
+}
+
+/**创建明细 */
+function createLine() {
+  router.push({
+      path: "/TemplateParamEdit",
+      query: {
+          id: "",
+          new_template_group_id: new_template_group_id.value,
+          new_template_code_id: id.value
+      }
+  });
 }
 
 </script>

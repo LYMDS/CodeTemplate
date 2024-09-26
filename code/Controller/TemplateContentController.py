@@ -16,3 +16,7 @@ def new_template_content_save():
 def new_template_content_get():
     id = request.args.get("id", "", type=str)
     return TemplateContentCommand().get(id)
+
+@TemplateContentController.route('/api/new_template_content/delete/', methods=['POST'])
+def new_template_group_delete():
+    return TemplateContentCommand().delete(request.get_json())

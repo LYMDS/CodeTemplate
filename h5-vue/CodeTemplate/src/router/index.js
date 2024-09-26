@@ -40,6 +40,22 @@ const router = createRouter({
           meta: {
             title: '模板内容详情页'
           }
+        },
+        {
+          path: '/TemplateParamEdit',
+          name: 'TemplateParamEdit',
+          component: () => import('../views/TemplateParamEdit.vue'),
+          meta: {
+            title: '模板参数详情页'
+          }
+        },
+        {
+          path: '/TemplateParamCreate',
+          name: 'TemplateParamCreate',
+          component: () => import('../views/TemplateParamEdit.vue'),
+          meta: {
+            title: '模板参数新建页'
+          }
         }
       ]
     },

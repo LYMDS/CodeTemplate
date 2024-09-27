@@ -13,6 +13,10 @@ class AttachmentCommand(InitDataUtil):
         data = self.DataServer.session.get(new_attachment, id)
         return json.dumps(to_primitive(data))
 
+    def get_content(self, id):
+        data = self.DataServer.session.get(new_attachment, id)
+        return data.new_content
+
     def upload(self, file):
 
         filename = file.filename

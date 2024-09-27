@@ -4,7 +4,8 @@
       <el-button type="primary" round @click="save">保存</el-button>
       <el-button type="success" round @click="create">新建</el-button>
       <el-button type="danger" round @click="del">删除</el-button>
-      <el-button type="primary" round @click="download">下载</el-button>
+      <el-button type="success" round @click="render">生成</el-button>
+      <el-button type="primary" round @click="download">下载模板</el-button>
       <el-button type="danger" round @click="back">返回</el-button>
     </el-header>
     <el-main>
@@ -87,9 +88,20 @@
         :limit="1"
         :on-success="fileUploadSuccess"
       >
-        <el-button type="primary">上传文件</el-button>
+        <el-button type="primary">上传模板</el-button>
       </el-upload>
     </el-main>
+    <el-dialog v-model="dialogCodeVisible" title="代码" width="88%">
+    <el-input type="textarea" 
+    v-model="codeString" :rows="18" style="width: 100%"
+    ></el-input>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="dialogCodeVisible = false">关闭</el-button>
+        <el-button type="primary" @click="dialogCodeVisible = false">复制</el-button>
+      </div>
+    </template>
+  </el-dialog>
   </el-container>
 </template>
 
@@ -116,7 +128,8 @@ var formData = ref({
 });
 var tableData = ref([]);
 var fileList = ref([]);
-
+var dialogCodeVisible = ref(false)
+var codeString = ref("")
 onMounted(() => {
   id.value = router.currentRoute.value.query.id;
   new_template_group_id.value =
@@ -250,6 +263,17 @@ function createLine() {
           new_template_code_id: id.value
       }
   });
+}
+
+/**生成当前文档并预览 */
+function render() {
+  req.get(`/api/templaterender/template_content/?id=${id.value}`).then(res => {
+        // console.log("/api/templaterender/template_content/=>res", res.data);
+        codeString.value = res.data;
+        dialogCodeVisible.value = true;
+    }).catch(err => {
+      ElMessage.error(err)
+    });
 }
 
 </script>

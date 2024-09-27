@@ -12,6 +12,11 @@ class TemplateParamCommand(InitDataUtil):
             .filter(new_template_param.new_template_code_id == id).all()
         return json.dumps(to_primitive(templateParamList))
 
+    def _getlistbycontentid(self, id):
+        templateParamList = self.DataServer.session.query(new_template_param) \
+            .filter(new_template_param.new_template_code_id == id).all()
+        return templateParamList
+
     # 根据Id获取一条数据
     def get(self, id):
         data = self.DataServer.session.get(new_template_param, id)

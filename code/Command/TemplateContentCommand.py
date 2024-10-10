@@ -3,6 +3,7 @@ from sqlalchemy import or_
 from Models.new_template_content import *
 import json
 from objtyping import to_primitive
+from Command.AttachmentCommand import *
 
 class TemplateContentCommand(InitDataUtil):
 
@@ -49,3 +50,15 @@ class TemplateContentCommand(InitDataUtil):
         self.DataServer.session.commit()
         self.DataServer.session.close()
         return ids
+
+    # 保存代码
+    def savecode(self, data):
+        id = data["id"]
+        content = data["content"]
+        template_content = self.DataServer.session.get(new_template_content, id)
+        attachmentId = AttachmentCommand().save(template_content.new_attachment_id, template_content.new_file_name + ".txt", content.encode())
+        if template_content.new_attachment_id != attachmentId:
+            template_content.new_attachment_id = attachmentId
+            self.DataServer.session.commit()
+        self.DataServer.session.close()
+        return ""

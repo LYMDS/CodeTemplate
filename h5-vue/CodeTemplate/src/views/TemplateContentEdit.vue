@@ -5,6 +5,7 @@
       <el-button type="success" round @click="create">新建</el-button>
       <el-button type="danger" round @click="del">删除</el-button>
       <el-button type="success" round @click="render">生成</el-button>
+      <el-button type="danger" round @click="preview">预览模板</el-button>
       <el-button type="primary" round @click="download">下载模板</el-button>
       <el-button type="danger" round @click="back">返回</el-button>
     </el-header>
@@ -36,7 +37,8 @@
           />
         </el-form-item>
       </el-form>
-      <el-table v-show="id"
+      <el-table
+        v-show="id"
         ref="tableRef"
         :data="tableData"
         style="width: 100%"
@@ -45,9 +47,9 @@
         <el-table-column type="selection" width="55" />
         <el-table-column prop="new_name" label="参数名" width="180" />
         <el-table-column prop="new_type" label="参数类型" width="180" />
-        <el-table-column prop="new_value" label="参数值" width="180" />
-        <el-table-column prop="new_createdon" label="创建时间" width="180" />
-        <el-table-column prop="new_modifiedon" label="修改时间" width="180" />
+        <el-table-column prop="new_value" label="参数值" width="500" />
+        <!-- <el-table-column prop="new_createdon" label="创建时间" width="180" />
+        <el-table-column prop="new_modifiedon" label="修改时间" width="180" /> -->
         <el-table-column align="right">
           <template #header>
             <el-button
@@ -91,17 +93,58 @@
         <el-button type="primary">上传模板</el-button>
       </el-upload>
     </el-main>
-    <el-dialog v-model="dialogCodeVisible" title="代码" width="88%">
-    <el-input type="textarea" 
-    v-model="codeString" :rows="18" style="width: 100%"
-    ></el-input>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="dialogCodeVisible = false">关闭</el-button>
-        <el-button type="primary" @click="dialogCodeVisible = false">复制</el-button>
-      </div>
-    </template>
-  </el-dialog>
+    <el-dialog v-model="dialogCodeVisible" :show-close="false" width="70%">
+      <template #header="{ close, titleId, titleClass }">
+        <div class="my-header">
+          <h4 :id="titleId" :class="titleClass">模板内容</h4>
+          <template v-if="!isrender && previeworedit">
+            <el-button
+              @click="editcode"
+              circle
+              :icon="Edit"
+              size="small"
+            ></el-button>
+          </template>
+          <template v-if="!isrender && !previeworedit">
+            <el-button
+              @click="savecode"
+              circle
+              :icon="Finished"
+              size="small"
+            ></el-button>
+            <el-button
+              type="primary"
+              @click="preview"
+              circle
+              :icon="Back"
+              size="small"
+            ></el-button>
+          </template>
+          <el-button
+            type="danger"
+            @click="close"
+            circle
+            :icon="Close"
+            size="small"
+          ></el-button>
+        </div>
+      </template>
+
+      <!-- 预览当前模板 -->
+      <div v-if="!isrender && previeworedit" v-html="codeString"></div>
+      <!-- 编辑当前模版 -->
+      <el-input
+        v-if="!previeworedit || isrender"
+        :spellcheck="false"
+        :autosize="true"
+        type="textarea"
+        v-model="codeString"
+        style="width: 100%"
+      ></el-input>
+      <template #footer>
+        <div class="dialog-footer"></div>
+      </template>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -109,13 +152,20 @@
 import { onMounted, ref } from "vue";
 import req from "../common/interface";
 import { useRouter } from "vue-router";
-import { RefreshRight, Plus } from "@element-plus/icons-vue";
+import {
+  RefreshRight,
+  Plus,
+  Delete,
+  Edit,
+  Back,
+  Close,
+  Finished,
+} from "@element-plus/icons-vue";
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 
 const router = useRouter();
 var id = ref("");
 var new_template_group_id = ref("");
-
 var formData = ref({
   new_template_contentid: id.value,
   new_template_group_id: new_template_group_id.value,
@@ -128,8 +178,10 @@ var formData = ref({
 });
 var tableData = ref([]);
 var fileList = ref([]);
-var dialogCodeVisible = ref(false)
-var codeString = ref("")
+var dialogCodeVisible = ref(false);
+var previeworedit = ref(true);
+var isrender = ref(false);
+var codeString = ref("");
 onMounted(() => {
   id.value = router.currentRoute.value.query.id;
   new_template_group_id.value =
@@ -161,12 +213,15 @@ function loadData() {
 /**加载明细 */
 function loadLine() {
   if (id.value) {
-    req.get(`/api/new_template_param/getlistbycontentid/?id=${id.value}`).then(res => {
+    req
+      .get(`/api/new_template_param/getlistbycontentid/?id=${id.value}`)
+      .then((res) => {
         console.log("res", res.data);
         tableData.value = res.data;
-    }).catch(err => {
-      ElMessage.error(err)
-    });
+      })
+      .catch((err) => {
+        ElMessage.error(err);
+      });
   }
 }
 
@@ -185,7 +240,7 @@ function save() {
 }
 
 function create() {
-  id.value = ""
+  id.value = "";
   formData.value = {
     new_template_contentid: id.value,
     new_template_group_id: new_template_group_id.value,
@@ -195,19 +250,22 @@ function create() {
     new_createdon: "",
     new_modifiedon: "",
     new_attachment_id: "",
-  }
+  };
   tableData.value = [];
   fileList.value = [];
 }
 
 /**删除 */
 function del() {
-  req.post("/api/new_template_content/delete/", [id.value]).then(res => {
+  req
+    .post("/api/new_template_content/delete/", [id.value])
+    .then((res) => {
       console.log("res", res);
       back();
-  }).catch(err => {
+    })
+    .catch((err) => {
       console.error(err);
-  });
+    });
 }
 
 /**刷新明细 */
@@ -238,14 +296,14 @@ function back() {
 
 /**跳转内容明细 */
 function dblclick(event) {
-    router.push({
-        path: "/TemplateParamEdit",
-        query: {
-            id: event.new_template_paramid,
-            new_template_group_id: new_template_group_id.value,
-            new_template_code_id: id.value
-        }
-    });
+  router.push({
+    path: "/TemplateParamEdit",
+    query: {
+      id: event.new_template_paramid,
+      new_template_group_id: new_template_group_id.value,
+      new_template_code_id: id.value,
+    },
+  });
 }
 
 /**跳转内容明细 */
@@ -256,26 +314,78 @@ function handleEdit(index, event) {
 /**创建明细 */
 function createLine() {
   router.push({
-      path: "/TemplateParamEdit",
-      query: {
-          id: "",
-          new_template_group_id: new_template_group_id.value,
-          new_template_code_id: id.value
-      }
+    path: "/TemplateParamEdit",
+    query: {
+      id: "",
+      new_template_group_id: new_template_group_id.value,
+      new_template_code_id: id.value,
+    },
   });
 }
 
 /**生成当前文档并预览 */
 function render() {
-  req.get(`/api/templaterender/template_content/?id=${id.value}`).then(res => {
-        // console.log("/api/templaterender/template_content/=>res", res.data);
-        codeString.value = res.data;
-        dialogCodeVisible.value = true;
-    }).catch(err => {
-      ElMessage.error(err)
+  req
+    .get(`/api/templaterender/template_content/?id=${id.value}`)
+    .then((res) => {
+      // console.log("/api/templaterender/template_content/=>res", res.data);
+      codeString.value = res.data;
+      isrender.value = true;
+      dialogCodeVisible.value = true;
+    })
+    .catch((err) => {
+      ElMessage.error(err);
     });
 }
 
+/**预览当前模板 */
+function preview() {
+  req
+    .get(`/api/templaterender/preview_template_content/?id=${id.value}`)
+    .then((res) => {
+      // console.log("/api/templaterender/template_content/=>res", res.data);
+      codeString.value = res.data.replace(/\n/g, "<br/>");
+      previeworedit.value = true;
+      isrender.value = false;
+      dialogCodeVisible.value = true;
+    })
+    .catch((err) => {
+      ElMessage.error(err);
+    });
+}
+
+/**编辑代码 */
+function editcode() {
+  req
+    .get(`/api/templaterender/edit_template_content/?id=${id.value}`)
+    .then((res) => {
+      codeString.value = res.data; //.replace(/\n/g, "<br/>");
+      previeworedit.value = false;
+    })
+    .catch((err) => {
+      ElMessage.error(err);
+    });
+}
+
+/**保存代码 */
+function savecode() {
+  req.post("/api/new_template_content/savecode/", {
+    content: codeString.value,
+    id: id.value
+  }).then(res => {
+    ElMessage.success("保存成功");
+  }).catch(err => {
+    ElMessage.error(err);
+  })
+
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.my-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  gap: 16px;
+}
+</style>

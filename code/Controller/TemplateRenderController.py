@@ -11,3 +11,13 @@ def templaterender_test():
 def templaterender_template_content():
     id = request.args.get("id", "", type=str)
     return TemplateRenderCommand().template_content(id)
+
+@TemplateRenderController.route('/api/templaterender/preview_template_content/', methods=['GET'])
+def templaterender_preview_template_content():
+    id = request.args.get("id", "", type=str)
+    return TemplateRenderCommand().preview_template_content(id)
+
+@TemplateRenderController.route('/api/templaterender/edit_template_content/', methods=['GET'])
+def templaterender_edit_template_content():
+    id = request.args.get("id", "", type=str)
+    return TemplateRenderCommand().edit_template_content(id)

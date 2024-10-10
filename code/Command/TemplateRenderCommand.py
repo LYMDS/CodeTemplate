@@ -10,6 +10,7 @@ from Command.TemplateParamCommand import *
 from Command.AttachmentCommand import *
 import json
 from objtyping import to_primitive
+import html
 
 class TemplateRenderCommand(InitDataUtil):
 
@@ -32,3 +33,30 @@ class TemplateRenderCommand(InitDataUtil):
                 params[p.new_name] = p.new_value
         return j.auto_render_one(content_data.new_file_name, template_content, params)
 
+    def preview_template_content(self, id):
+        j = Jinja2Helper()
+        content_data = TemplateContentCommand()._get(id)
+        params_data = TemplateParamCommand()._getlistbycontentid(id)
+
+        if content_data.new_attachment_id is None or content_data.new_attachment_id == "":
+            return ""
+            # raise ValueError("未上传模板文件")
+        bytes = AttachmentCommand().get_content(content_data.new_attachment_id)
+        template_content = bytes.decode("utf-8")
+        # html转义
+        template_content = html.escape(template_content)
+        params = {}
+        if params_data != None and len(params_data) > 0:
+            for p in params_data:
+                params[p.new_name] = "<span style='color: red'>" + p.new_name + "</span>"
+        return j.auto_render_one(content_data.new_file_name, template_content, params)
+
+    def edit_template_content(self, id):
+        j = Jinja2Helper()
+        content_data = TemplateContentCommand()._get(id)
+
+        if content_data.new_attachment_id is None or content_data.new_attachment_id == "":
+            return ""
+        bytes = AttachmentCommand().get_content(content_data.new_attachment_id)
+        template_content = bytes.decode("utf-8")
+        return template_content

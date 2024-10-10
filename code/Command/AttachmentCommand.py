@@ -43,3 +43,22 @@ class AttachmentCommand(InitDataUtil):
         bytes_io = io.BytesIO(data.new_content)
         filename = data.new_name
         return send_file(bytes_io, download_name=filename, mimetype=data.new_mime_type, as_attachment=True)
+
+    def save(self, id, filename, content):
+        saveTable = new_attachment()
+
+        if id != "":  # 更新
+            saveTable = self.DataServer.session.query(new_attachment).filter(
+                new_attachment.new_attachmentid == id).first()
+        else:  # 创建
+            self.DataServer.session.add(saveTable)
+            saveTable.new_name = filename
+            saveTable.new_content_type = "text/plain"
+            saveTable.new_mime_type = "text/plain"
+
+        saveTable.new_content = content
+        self.DataServer.session.commit()
+        id = saveTable.new_attachmentid
+        self.DataServer.session.close()
+        print(id)
+        return id

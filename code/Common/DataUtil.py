@@ -4,9 +4,11 @@ from sqlalchemy.orm import sessionmaker
 
 class DataUtil:
 
+    DataBaseUrl = 'sqlite:///CodeTemplate.db'
+
     # 初始化函数
     def __init__(self):
-         self.engine = create_engine('sqlite:///C:\\D\\PythonWorkSpace\\jinja2代码模板项目\\CodeTemplate.db', echo=True, pool_size=8, pool_recycle=60*30)
+         self.engine = create_engine(self.DataBaseUrl, echo=True, pool_size=8, pool_recycle=60*30)
 
     # 获取Session
     def get_session(self):

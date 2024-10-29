@@ -1,0 +1,4 @@
+1. 双击build.bat执行打包命令
+2. 打包完成后在本目录生成build文件夹
+3.将初始化数据库CodeTemplate.db拷贝到CodeTemplate.exe的根目录下
+

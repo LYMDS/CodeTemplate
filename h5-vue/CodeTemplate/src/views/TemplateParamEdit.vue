@@ -12,7 +12,21 @@
             <el-input v-model="formData.new_name" placeholder="" clearable />
           </el-form-item>
           <el-form-item label="参数类型">
-            <el-input v-model="formData.new_type" placeholder="" clearable />
+            <!-- <el-input v-model="formData.new_type" placeholder="" clearable /> -->
+
+            <el-select
+              v-model="formData.new_type"
+              placeholder="选择类型"
+              style="width: 240px"
+            >
+              <el-option
+                v-for="item in typeOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+
           </el-form-item>
           <el-form-item label="参数值">
             <el-input v-model="formData.new_value" placeholder="" clearable />
@@ -60,6 +74,20 @@
     new_createdon: "",
     new_modifiedon: "",
   });
+  var typeOptions = ref([
+    {
+      label: "文本",
+      value: 1
+    },
+    {
+      label: "对象",
+      value: 2
+    },
+    {
+      label: "列表",
+      value: 3
+    },
+  ])
   var tableData = ref([]);
   var fileList = ref([]);
   

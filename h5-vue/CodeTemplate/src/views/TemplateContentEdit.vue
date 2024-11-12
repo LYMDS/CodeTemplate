@@ -46,7 +46,11 @@
       >
         <el-table-column type="selection" width="55" />
         <el-table-column prop="new_name" label="参数名" width="180" />
-        <el-table-column prop="new_type" label="参数类型" width="180" />
+        <el-table-column prop="new_type" label="参数类型" width="180" >
+          <template #default="scope">
+            {{ getLabel(scope.row.new_type) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="new_value" label="参数值" width="500" />
         <!-- <el-table-column prop="new_createdon" label="创建时间" width="180" />
         <el-table-column prop="new_modifiedon" label="修改时间" width="180" /> -->
@@ -182,6 +186,24 @@ var dialogCodeVisible = ref(false);
 var previeworedit = ref(true);
 var isrender = ref(false);
 var codeString = ref("");
+var typeOptions = ref([
+    {
+      label: "文本",
+      value: 1
+    },
+    {
+      label: "对象",
+      value: 2
+    },
+    {
+      label: "列表",
+      value: 3
+    },
+  ])
+  const getLabel = (value) => {
+      const option = typeOptions.value.find(opt => opt.value === value);
+      return option ? option.label : '';
+    }
 onMounted(() => {
   id.value = router.currentRoute.value.query.id;
   new_template_group_id.value =
@@ -351,6 +373,9 @@ function preview() {
     })
     .catch((err) => {
       ElMessage.error(err);
+      // 报错后转编辑
+      editcode();
+      dialogCodeVisible.value = true;
     });
 }
 

@@ -56,7 +56,23 @@ const router = createRouter({
           meta: {
             title: '模板参数新建页'
           }
-        }
+        },
+        {
+          path: '/TemplateFilterList',
+          name: 'TemplateFilterList',
+          component: () => import('../views/TemplateFilterList.vue'),
+          meta: {
+            title: '过滤器详情页'
+          }
+        },
+        {
+          path: '/TemplateFilterEdit',
+          name: 'TemplateFilterEdit',
+          component: () => import('../views/TemplateFilterEdit.vue'),
+          meta: {
+            title: '过滤器编辑页'
+          }
+        },
       ]
     },
     {

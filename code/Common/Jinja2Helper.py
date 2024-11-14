@@ -1,7 +1,10 @@
 from jinja2 import Environment, PackageLoader, DictLoader
+
+from Command.FilterCommand import FilterCommand
 from Common.Extensions.CustomVariableExtension import CustomVariableExtension
 from Common.Extensions.StyledExpressionExtension import StyledExpressionExtension
 from jinja2.nodes import TemplateData, Template, Output, For, Name, Getitem, Getattr
+import sys
 
 class Jinja2Helper:
     templates = {}
@@ -28,6 +31,7 @@ class Jinja2Helper:
     def add_load(self, name, content):
         self.templates[name] = content
         self.load()
+        self.load_filter()
 
     # 加载环境
     def load(self):
@@ -119,6 +123,14 @@ class Jinja2Helper:
         if hasattr(nodes[i], "nodes"):
             for j in range(len(nodes[i].nodes)):
                 self.add_style_for_nodes(nodes[i].nodes, j)
+
+    # 加载过滤器
+    def load_filter(self):
+        list = FilterCommand().getlist("")
+        for data in list:
+            exec(data.new_func)
+            self.env.filters[data.new_name] = getattr(sys.modules[__name__], data.new_name)
+
 
 
 

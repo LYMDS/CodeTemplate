@@ -1,11 +1,15 @@
 from jinja2 import Environment, PackageLoader, DictLoader
+
+from Command.FilterCommand import FilterCommand
 from Common.Extensions.CustomVariableExtension import CustomVariableExtension
 from Common.Extensions.StyledExpressionExtension import StyledExpressionExtension
 from jinja2.nodes import TemplateData, Template, Output, For, Name, Getitem, Getattr
+import sys
 
 class Jinja2Helper:
     templates = {}
     env = None
+    filterGlobals = {}
 
     #region preview样式参数
     StyleNamePrefix = "<span style='color: red'>"
@@ -14,9 +18,9 @@ class Jinja2Helper:
     StyleGetitemPostfix = "</span>"
     StyleGetattrPrefix = "<span style='color: green'>"
     StyleGetattrPostfix = "</span>"
-    StyleForPrefix = "<div style='border-radius: 16px;border: 1px dashed red;padding: 16px;background: #ccc'>"
+    StyleForPrefix = "<div style='border-radius: 16px;border: 2px dashed #6f7178;padding: 16px;background: #a4f7aa;'>"
     StyleForPostfix = "</div>"
-    StyleIterPreFix = "<div style='background: cornsilk'>"
+    StyleIterPreFix = "<div style='background: #bfc3ef;border-radius: 10px;padding: 6px;color: white;'>"
     StyleIterPostFix = "</div>"
     #endregion
 
@@ -33,6 +37,7 @@ class Jinja2Helper:
     def load(self):
         loader = DictLoader(self.templates)
         self.env = Environment(loader=loader)
+        self.load_filter()
 
     # 加载自定义拓展环境
     def load_with_extensions(self):
@@ -119,6 +124,15 @@ class Jinja2Helper:
         if hasattr(nodes[i], "nodes"):
             for j in range(len(nodes[i].nodes)):
                 self.add_style_for_nodes(nodes[i].nodes, j)
+
+    # 加载过滤器
+    def load_filter(self):
+        list = FilterCommand().get_all_list()
+        for data in list:
+            exec(data.new_func, locals(), self.filterGlobals)
+            self.env.filters[data.new_name] = self.filterGlobals[data.new_name]
+
+
 
 
 

@@ -14,6 +14,11 @@ class FilterCommand(InitDataUtil):
             .filter(or_(new_filter.new_name.like(f"%{search}%"), search == "")).all()
         return json.dumps(to_primitive(filterList))
 
+    # 获取所有列表
+    def get_all_list(self):
+        filterList = self.DataServer.session.query(new_filter).all()
+        return filterList
+
     # 保存
     def save(self, data):
         id = data["new_filterid"]

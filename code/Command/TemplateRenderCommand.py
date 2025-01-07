@@ -11,6 +11,8 @@ from Command.AttachmentCommand import *
 import json
 from objtyping import to_primitive
 import html
+import zipfile
+from flask import make_response
 
 class TemplateRenderCommand(InitDataUtil):
 
@@ -37,6 +39,43 @@ class TemplateRenderCommand(InitDataUtil):
                 elif p.new_type == 3: # 列表
                     params[p.new_name] = json.loads(p.new_value)
         return j.auto_render_one(content_data.new_file_name, template_content, params)
+
+    def template_group(self, id):
+        templatecontentList = TemplateContentCommand()._getlistbygroupid(id)
+        if templatecontentList != None and len(templatecontentList) > 0:
+            # 创建一个内存中的文件对象
+            memory_file = io.BytesIO()
+            # 创建一个 ZIP 文件对象
+            with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for content_data in templatecontentList:
+                    j = Jinja2Helper()
+                    params_data = TemplateParamCommand()._getlist_with_global_param(content_data.new_template_group_id, content_data.new_template_contentid)
+                    if content_data.new_attachment_id is None or content_data.new_attachment_id == "":
+                        raise ValueError("未上传模板文件")
+                    attachment = AttachmentCommand()._get(content_data.new_attachment_id)
+                    bytes = attachment.new_content
+                    template_content = bytes.decode("utf-8")
+                    params = {}
+                    if params_data != None and len(params_data) > 0:
+                        for p in params_data:
+                            if p.new_type == 1:  # 文本
+                                params[p.new_name] = p.new_value
+                            elif p.new_type == 2:  # 对象
+                                params[p.new_name] = json.loads(p.new_value)
+                            elif p.new_type == 3:  # 列表
+                                params[p.new_name] = json.loads(p.new_value)
+                    render_str = j.auto_render_one(content_data.new_file_name, template_content, params)
+                    zipf.writestr(attachment.new_name ,render_str.encode())
+            # 将内存中的文件对象移动到起始位置
+            memory_file.seek(0)
+            # 创建一个响应对象，将 ZIP 文件作为附件发送
+            response = make_response(memory_file.getvalue())
+            response.headers['Content-Disposition'] = 'attachment; filename=files.zip'
+            response.headers['Content-Type'] = 'application/zip'
+            return response
+        else:
+            raise ValueError("没有文件可以生成")
+
 
     def preview_template_content(self, id):
         j = Jinja2Helper()

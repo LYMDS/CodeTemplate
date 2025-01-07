@@ -13,6 +13,12 @@ class TemplateContentCommand(InitDataUtil):
             .filter(new_template_content.new_template_group_id == id).all()
         return json.dumps(to_primitive(templateContentList))
 
+    # 根据模板Id获取内容明细
+    def _getlistbygroupid(self, id):
+        templateContentList = self.DataServer.session.query(new_template_content) \
+            .filter(new_template_content.new_template_group_id == id).all()
+        return templateContentList
+
     # 保存
     def save(self, data):
         id = data["new_template_contentid"]

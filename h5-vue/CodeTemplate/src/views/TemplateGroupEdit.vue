@@ -3,6 +3,7 @@
     <el-header>
       <el-button type="primary" round @click="save">保存</el-button>
       <el-button type="success" round @click="create">新建</el-button>
+      <el-button v-if="id" type="primary" round @click="render">生成</el-button>
       <el-button type="danger" round @click="del">删除</el-button>
       <el-button type="danger" round @click="back">返回</el-button>
     </el-header>
@@ -105,6 +106,7 @@ import { onMounted, ref } from "vue";
 import req from "../common/interface";
 import { useRouter } from "vue-router";
 import { Plus, RefreshRight } from "@element-plus/icons-vue";
+import { ElLoading } from 'element-plus'
 import ParamEditor from "../components/ParamEditor.vue";
 const router = useRouter();
 var id = ref("");
@@ -176,6 +178,20 @@ function create() {
   // }
   // 路由跳转有问题
   router.push("/TemplateGroupEdit");
+}
+
+/**生成文档 */
+function render() {
+  const loading = ElLoading.service()
+  req
+    .get(`/api/templaterender/template_group/?id=${id.value}`)
+    .then((res) => {
+      loading.close()
+    })
+    .catch((err) => {
+      loading.close()
+      ElMessage.error(err);
+    });
 }
 
 /**删除 */

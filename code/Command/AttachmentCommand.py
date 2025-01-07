@@ -1,4 +1,5 @@
 from Common.InitDataUtil import *
+from Common.DataModelMaker import *
 from sqlalchemy import or_
 from Models.new_attachment import *
 import json
@@ -10,11 +11,15 @@ import io
 
 class AttachmentCommand(InitDataUtil):
     def get(self, id):
+        data = self._get(id)
+        return sqlalchemydata_tojson(data)
+
+    def _get(self, id):
         data = self.DataServer.session.get(new_attachment, id)
-        return json.dumps(to_primitive(data))
+        return data
 
     def get_content(self, id):
-        data = self.DataServer.session.get(new_attachment, id)
+        data = self._get(id)
         return data.new_content
 
     def upload(self, file):
@@ -39,7 +44,7 @@ class AttachmentCommand(InitDataUtil):
         return id
 
     def download(self, id):
-        data = self.DataServer.session.get(new_attachment, id)
+        data = self._get(id)
         bytes_io = io.BytesIO(data.new_content)
         filename = data.new_name
         return send_file(bytes_io, download_name=filename, mimetype=data.new_mime_type, as_attachment=True)

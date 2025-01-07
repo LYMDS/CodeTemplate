@@ -12,6 +12,11 @@ def templaterender_template_content():
     id = request.args.get("id", "", type=str)
     return TemplateRenderCommand().template_content(id)
 
+@TemplateRenderController.route('/api/templaterender/template_group/', methods=['GET'])
+def templaterender_template_group():
+    id = request.args.get("id", "", type=str)
+    return TemplateRenderCommand().template_group(id)
+
 @TemplateRenderController.route('/api/templaterender/preview_template_content/', methods=['GET'])
 def templaterender_preview_template_content():
     id = request.args.get("id", "", type=str)

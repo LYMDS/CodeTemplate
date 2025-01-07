@@ -21,8 +21,8 @@ class TemplateRenderCommand(InitDataUtil):
     def template_content(self, id):
         j = Jinja2Helper()
         content_data = TemplateContentCommand()._get(id)
-        params_data = TemplateParamCommand()._getlistbycontentid(id)
-
+        # params_data = TemplateParamCommand()._getlistbycontentid(id)
+        params_data = TemplateParamCommand()._getlist_with_global_param(content_data.new_template_group_id ,id)
         if content_data.new_attachment_id is None or content_data.new_attachment_id == "":
             raise ValueError("未上传模板文件")
         bytes = AttachmentCommand().get_content(content_data.new_attachment_id)
@@ -49,7 +49,7 @@ class TemplateRenderCommand(InitDataUtil):
         bytes = AttachmentCommand().get_content(content_data.new_attachment_id)
         template_content = bytes.decode("utf-8")
         # html转义
-        template_content = html.escape(template_content)
+        #template_content = html.escape(template_content) 牺牲源代码中本来有的html代码被展示
         #与{{obj["name"]}}的参数写法冲突 html.escape将"转义了
         params = {}
         # if params_data != None and len(params_data) > 0:

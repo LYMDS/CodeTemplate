@@ -9,9 +9,18 @@ def new_template_param_getlistbycontentid():
     id = request.args.get("id", "", type=str)
     return TemplateParamCommand().getlistbycontentid(id)
 
+@TemplateParamController.route('/api/new_template_param/getlistbygroupid/', methods=['GET'])
+def new_template_param_getlistbygroupid():
+    id = request.args.get("id", "", type=str)
+    return TemplateParamCommand().getlistbygroupid(id)
+
 @TemplateParamController.route('/api/new_template_param/save/', methods=['POST'])
 def new_template_param_save():
     return TemplateParamCommand().save(request.get_json())
+
+@TemplateParamController.route('/api/new_template_param/batchsave/', methods=['POST'])
+def new_template_param_batchsave():
+    return TemplateParamCommand().batch_save(request.get_json())
 
 @TemplateParamController.route('/api/new_template_param/get/', methods=['GET'])
 def new_template_param_get():

@@ -4,14 +4,14 @@
             <el-button type="primary" round @click="refresh">刷新</el-button>
             <el-button type="success" round @click="create">新建</el-button>
             <el-button type="danger" round @click="del">删除</el-button>
-            <el-input class="searchstr_input" v-model="searchStr" placeholder="搜索" />
+            <el-input class="searchstr_input" v-model="searchStr" placeholder="搜索" :spellcheck="false"/>
         </el-header>
         <el-main>
             <el-table ref="tableRef" :data="tableData" style="width: 100%" @row-dblclick="dblclick">
                 <el-table-column type="selection" width="55" />
                 <el-table-column prop="new_name" label="过滤器名称" width="180" />
                 <el-table-column prop="new_memo" label="说明" width="180" />
-                <el-table-column prop="new_func" label="函数" width="180" />
+                <el-table-column prop="new_func" label="函数" width="180" :show-overflow-tooltip="true" />
                 <el-table-column prop="new_createdon" label="创建时间" width="180" />
                 <el-table-column prop="new_modifiedon" label="修改时间" width="180" />
             </el-table>

@@ -9,11 +9,9 @@
       <el-main>
         <el-form :inline="true" :model="formData" label-position="top">
           <el-form-item label="参数名">
-            <el-input v-model="formData.new_name" placeholder="" clearable />
+            <el-input v-model="formData.new_name" placeholder="" clearable :spellcheck="false"/>
           </el-form-item>
           <el-form-item label="参数类型">
-            <!-- <el-input v-model="formData.new_type" placeholder="" clearable /> -->
-
             <el-select
               v-model="formData.new_type"
               placeholder="选择类型"
@@ -29,7 +27,7 @@
 
           </el-form-item>
           <el-form-item label="参数值">
-            <el-input v-model="formData.new_value" placeholder="" clearable />
+            <el-input v-model="formData.new_value" placeholder="" clearable :spellcheck="false"/>
           </el-form-item>
           <el-form-item label="创建时间">
             <el-date-picker
@@ -102,11 +100,7 @@
     } else {
       formData.value.new_template_group_id = new_template_group_id.value;
     }
-    if (!new_template_code_id.value) {
-      ElMessage.error("缺失关联模板代码!");
-    }else{
-      formData.value.new_template_code_id = new_template_code_id.value;
-    }
+    formData.value.new_template_code_id = new_template_code_id.value;
     loadData();
   });
   
@@ -116,7 +110,6 @@
       req
         .get(`/api/new_template_param/get/?id=${id.value}`)
         .then((res) => {
-          console.log("res", res.data);
           formData.value = res.data;
         })
         .catch((err) => {
@@ -131,7 +124,6 @@
     req
       .post("/api/new_template_param/save/", formData.value)
       .then((res) => {
-        console.log("res", res);
         id.value = res.data;
         loadData();
       })
@@ -159,7 +151,6 @@
   /**删除 */
   function del() {
     req.post("/api/new_template_param/delete/", [id.value]).then(res => {
-        console.log("res", res);
         back();
     }).catch(err => {
         console.error(err);

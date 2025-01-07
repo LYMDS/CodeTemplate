@@ -4,7 +4,7 @@
         <el-button type="primary" round @click="refresh">刷新</el-button>
         <el-button type="success" round @click="create">新建</el-button>
         <el-button type="danger" round @click="del">删除</el-button>
-        <el-input class="searchstr_input" v-model="searchStr"  placeholder="搜索" />
+        <el-input class="searchstr_input" v-model="searchStr"  placeholder="搜索" :spellcheck="false"/>
       </el-header>
       <el-main>
         <el-table ref="tableRef" :data="tableData" style="width: 100%" @row-dblclick="dblclick">

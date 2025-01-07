@@ -6,19 +6,28 @@
       <el-button type="danger" round @click="del">删除</el-button>
       <el-button type="success" round @click="render">生成</el-button>
       <el-button type="danger" round @click="preview">预览模板</el-button>
-      <el-button type="primary" round @click="download">下载模板</el-button>
+      <el-upload 
+        :v-model:file-list="fileList"
+        :action="req.BaseUrl + '/api/new_attachment/upload/'"
+        :limit="1"
+        :on-success="fileUploadSuccess"
+        style="margin-left: 12px;display: inline-flex;"
+      >
+        <el-button type="primary" round>上传模板</el-button>
+      </el-upload>
+      <el-button type="primary" round @click="download" style="margin-left: 12px;">下载模板</el-button>
       <el-button type="danger" round @click="back">返回</el-button>
     </el-header>
     <el-main>
       <el-form :inline="true" :model="formData" label-position="top">
         <el-form-item label="文件名">
-          <el-input v-model="formData.new_file_name" placeholder="" clearable />
+          <el-input v-model="formData.new_file_name" placeholder="" clearable :spellcheck="false"/>
         </el-form-item>
         <el-form-item label="文件类型">
-          <el-input v-model="formData.new_file_type" placeholder="" clearable />
+          <el-input v-model="formData.new_file_type" placeholder="" clearable :spellcheck="false"/>
         </el-form-item>
         <el-form-item label="文件内容">
-          <el-input v-model="formData.new_content" placeholder="" clearable />
+          <el-input v-model="formData.new_content" placeholder="" clearable :spellcheck="false"/>
         </el-form-item>
         <el-form-item label="创建时间">
           <el-date-picker
@@ -37,65 +46,11 @@
           />
         </el-form-item>
       </el-form>
-      <el-table
-        v-show="id"
-        ref="tableRef"
-        :data="tableData"
-        style="width: 100%"
-        @row-dblclick="dblclick"
-      >
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="new_name" label="参数名" width="180" />
-        <el-table-column prop="new_type" label="参数类型" width="180" >
-          <template #default="scope">
-            {{ getLabel(scope.row.new_type) }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="new_value" label="参数值" width="500" />
-        <!-- <el-table-column prop="new_createdon" label="创建时间" width="180" />
-        <el-table-column prop="new_modifiedon" label="修改时间" width="180" /> -->
-        <el-table-column align="right">
-          <template #header>
-            <el-button
-              size="small"
-              :icon="Plus"
-              type="success"
-              circle
-              @click="createLine"
-            ></el-button>
-            <el-button
-              size="small"
-              :icon="RefreshRight"
-              type="success"
-              circle
-              @click="refreshLine"
-            ></el-button>
-          </template>
-          <template #default="scope">
-            <el-button
-              size="small"
-              @click="handleEdit(scope.$index, scope.row)"
-            >
-              Edit
-            </el-button>
-            <el-button
-              size="small"
-              type="danger"
-              @click="handleDelete(scope.$index, scope.row)"
-            >
-              Delete
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-upload
-        :v-model:file-list="fileList"
-        :action="req.BaseUrl + '/api/new_attachment/upload/'"
-        :limit="1"
-        :on-success="fileUploadSuccess"
-      >
-        <el-button type="primary">上传模板</el-button>
-      </el-upload>
+      <el-collapse v-model="activeCollapseNames">
+        <el-collapse-item title="参数列表" name="1">
+          <ParamEditor :type="2" :id="id" :groupid="new_template_group_id" />
+        </el-collapse-item>
+      </el-collapse>
     </el-main>
     <el-dialog v-model="dialogCodeVisible" :show-close="false" width="70%">
       <template #header="{ close, titleId, titleClass }">
@@ -166,12 +121,16 @@ import {
   Finished,
 } from "@element-plus/icons-vue";
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
+import ParamEditor from "../components/ParamEditor.vue";
 
 const router = useRouter();
 var id = ref("");
+id.value = router.currentRoute.value.query.id;
 var new_template_group_id = ref("");
+new_template_group_id.value =
+  router.currentRoute.value.query.new_template_group_id;
 var formData = ref({
-  new_template_contentid: id.value,
+  new_template_contentid: id.value || "",
   new_template_group_id: new_template_group_id.value,
   new_content: "",
   new_file_name: "",
@@ -180,41 +139,20 @@ var formData = ref({
   new_modifiedon: "",
   new_attachment_id: "",
 });
-var tableData = ref([]);
+if (!new_template_group_id.value) {
+  ElMessage.error("缺失主档模板组!");
+} else {
+  formData.value.new_template_group_id = new_template_group_id.value;
+}
 var fileList = ref([]);
 var dialogCodeVisible = ref(false);
 var previeworedit = ref(true);
 var isrender = ref(false);
 var codeString = ref("");
-var typeOptions = ref([
-    {
-      label: "文本",
-      value: 1
-    },
-    {
-      label: "对象",
-      value: 2
-    },
-    {
-      label: "列表",
-      value: 3
-    },
-  ])
-  const getLabel = (value) => {
-      const option = typeOptions.value.find(opt => opt.value === value);
-      return option ? option.label : '';
-    }
+const activeCollapseNames = ref(["1"]);
+
 onMounted(() => {
-  id.value = router.currentRoute.value.query.id;
-  new_template_group_id.value =
-    router.currentRoute.value.query.new_template_group_id;
-  if (!new_template_group_id.value) {
-    ElMessage.error("缺失主档模板组!");
-  } else {
-    formData.value.new_template_group_id = new_template_group_id.value;
-  }
   loadData();
-  loadLine();
 });
 
 /**加载数据 */
@@ -223,26 +161,10 @@ function loadData() {
     req
       .get(`/api/new_template_content/get/?id=${id.value}`)
       .then((res) => {
-        console.log("res", res.data);
         formData.value = res.data;
       })
       .catch((err) => {
         console.error(err);
-      });
-  }
-}
-
-/**加载明细 */
-function loadLine() {
-  if (id.value) {
-    req
-      .get(`/api/new_template_param/getlistbycontentid/?id=${id.value}`)
-      .then((res) => {
-        console.log("res", res.data);
-        tableData.value = res.data;
-      })
-      .catch((err) => {
-        ElMessage.error(err);
       });
   }
 }
@@ -252,7 +174,6 @@ function save() {
   req
     .post("/api/new_template_content/save/", formData.value)
     .then((res) => {
-      console.log("res", res);
       id.value = res.data;
       loadData();
     })
@@ -273,7 +194,6 @@ function create() {
     new_modifiedon: "",
     new_attachment_id: "",
   };
-  tableData.value = [];
   fileList.value = [];
 }
 
@@ -282,17 +202,11 @@ function del() {
   req
     .post("/api/new_template_content/delete/", [id.value])
     .then((res) => {
-      console.log("res", res);
       back();
     })
     .catch((err) => {
       console.error(err);
     });
-}
-
-/**刷新明细 */
-function refreshLine() {
-  loadLine();
 }
 
 /**文件上传成功 */
@@ -316,41 +230,11 @@ function back() {
   router.back();
 }
 
-/**跳转内容明细 */
-function dblclick(event) {
-  router.push({
-    path: "/TemplateParamEdit",
-    query: {
-      id: event.new_template_paramid,
-      new_template_group_id: new_template_group_id.value,
-      new_template_code_id: id.value,
-    },
-  });
-}
-
-/**跳转内容明细 */
-function handleEdit(index, event) {
-  dblclick(event);
-}
-
-/**创建明细 */
-function createLine() {
-  router.push({
-    path: "/TemplateParamEdit",
-    query: {
-      id: "",
-      new_template_group_id: new_template_group_id.value,
-      new_template_code_id: id.value,
-    },
-  });
-}
-
 /**生成当前文档并预览 */
 function render() {
   req
     .get(`/api/templaterender/template_content/?id=${id.value}`)
     .then((res) => {
-      // console.log("/api/templaterender/template_content/=>res", res.data);
       codeString.value = res.data;
       isrender.value = true;
       dialogCodeVisible.value = true;
@@ -365,7 +249,6 @@ function preview() {
   req
     .get(`/api/templaterender/preview_template_content/?id=${id.value}`)
     .then((res) => {
-      // console.log("/api/templaterender/template_content/=>res", res.data);
       codeString.value = res.data.replace(/\n/g, "<br/>");
       previeworedit.value = true;
       isrender.value = false;
@@ -375,6 +258,7 @@ function preview() {
       ElMessage.error(err);
       // 报错后转编辑
       editcode();
+      isrender.value = false;
       dialogCodeVisible.value = true;
     });
 }
@@ -394,15 +278,17 @@ function editcode() {
 
 /**保存代码 */
 function savecode() {
-  req.post("/api/new_template_content/savecode/", {
-    content: codeString.value,
-    id: id.value
-  }).then(res => {
-    ElMessage.success("保存成功");
-  }).catch(err => {
-    ElMessage.error(err);
-  })
-
+  req
+    .post("/api/new_template_content/savecode/", {
+      content: codeString.value,
+      id: id.value,
+    })
+    .then((res) => {
+      ElMessage.success("保存成功");
+    })
+    .catch((err) => {
+      ElMessage.error(err);
+    });
 }
 </script>
 

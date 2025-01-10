@@ -34,7 +34,8 @@ build_options = {
              # "datetime"
          ],
     "packages": [
-        "sqlalchemy"
+        "sqlalchemy",
+        "requests"
     ],
     "include_files":
         [

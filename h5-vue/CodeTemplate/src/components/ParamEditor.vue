@@ -45,6 +45,7 @@
               :datadriverid="id"
               :templateparamid="scope.row.new_template_paramid"
               style="padding: 8px; background-color: cadetblue;border-radius: 6px;"
+              :ref="el => dataParamEditors[scope.$index] = el"
             ></DataParameterEditor>
           </div>
         </template>
@@ -228,6 +229,8 @@ function refreshLine() {
 }
 
 /**批量保存 */
+const dataParamEditors = ref([])
+
 function batchSave() {
   if (tableData.value && tableData.value.length > 0) {
     var changeData = tableData.value.filter((r) =>
@@ -245,6 +248,11 @@ function batchSave() {
         .then((res) => {
           ElMessage.success("保存成功");
           refreshLine();
+          
+          // 新增触发子组件刷新逻辑
+          dataParamEditors.value.forEach(editor => {
+            if (editor?.load) editor.load()
+          })
         })
         .catch((err) => {
           ElMessage.error(err);

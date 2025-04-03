@@ -27,11 +27,3 @@ output = t.render(test_params)
 #output = j.render_one("test", test_params)
 print(output)
 
-
-
-
-
-
-
-
-

@@ -1,11 +1,9 @@
 #from __future__ import unicode_literals, absolute_import
-from sqlalchemy.orm import declarative_base
+from Models.Base import Base
 from sqlalchemy import Column, Integer, String, DateTime, MetaData
 from Common.Uuid import *
 from Common.DataUtil import *
 import datetime
-
-Base = declarative_base()
 
 class new_filter(Base):
     __tablename__ = "new_filter"

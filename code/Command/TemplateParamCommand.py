@@ -3,9 +3,11 @@ from sqlalchemy import or_, and_, asc, desc, alias
 from sqlalchemy.orm import aliased
 from Models.new_template_param import *
 from Models.new_template_content import *
+from Models.DataDriver import *
 import json
 from objtyping import to_primitive
 from Common.DataModelMaker import *
+from Event.TemplateParamEvent import new_datadriver_id_set
 
 
 class TemplateParamCommand(InitDataUtil):
@@ -16,6 +18,7 @@ class TemplateParamCommand(InitDataUtil):
 
     def _getlistbycontentid(self, id):
         new_template_content_alias = aliased(new_template_content)
+        DataDriver_alias = aliased(DataDriver)
         templateParamList = self.DataServer.session.query(
             new_template_param.new_template_paramid,
             new_template_param.new_name,
@@ -25,9 +28,14 @@ class TemplateParamCommand(InitDataUtil):
             new_template_param.new_template_code_id,
             new_template_param.new_createdon,
             new_template_param.new_modifiedon,
-            new_template_content_alias.new_file_name) \
+            new_template_param.new_datadriver_id,
+            new_template_content_alias.new_file_name,
+            DataDriver_alias.name,
+            DataDriver_alias.desc) \
             .outerjoin(new_template_content_alias,
                        new_template_param.new_template_code_id == new_template_content_alias.new_template_contentid) \
+            .outerjoin(DataDriver_alias,
+                       new_template_param.new_datadriver_id == DataDriver_alias.datadriverid) \
             .filter(new_template_param.new_template_code_id == id) \
             .order_by(asc(new_template_param.new_createdon)) \
             .all()
@@ -39,6 +47,7 @@ class TemplateParamCommand(InitDataUtil):
 
     def _getlistbygroupid(self, id):
         new_template_content_alias = aliased(new_template_content)
+        DataDriver_alias = aliased(DataDriver)
         templateParamList = self.DataServer.session.query(
             new_template_param.new_template_paramid,
             new_template_param.new_name,
@@ -48,9 +57,14 @@ class TemplateParamCommand(InitDataUtil):
             new_template_param.new_template_code_id,
             new_template_param.new_createdon,
             new_template_param.new_modifiedon,
-            new_template_content_alias.new_file_name) \
+            new_template_param.new_datadriver_id,
+            new_template_content_alias.new_file_name,
+            DataDriver_alias.name,
+            DataDriver_alias.desc) \
             .outerjoin(new_template_content_alias,
                        new_template_param.new_template_code_id == new_template_content_alias.new_template_contentid) \
+            .outerjoin(DataDriver_alias,
+                       new_template_param.new_datadriver_id == DataDriver_alias.datadriverid) \
             .filter(new_template_param.new_template_group_id == id) \
             .order_by(asc(new_template_param.new_template_code_id).nullsfirst(), asc(new_template_param.new_createdon)) \
             .all()
@@ -90,6 +104,7 @@ class TemplateParamCommand(InitDataUtil):
         saveTable.new_name = data["new_name"]
         saveTable.new_type = data["new_type"]
         saveTable.new_value = data["new_value"]
+        saveTable.new_datadriver_id = data["new_datadriver_id"]
 
         self.DataServer.session.commit()
         id = saveTable.new_template_paramid
@@ -117,6 +132,7 @@ class TemplateParamCommand(InitDataUtil):
             saveTable.new_name = data["new_name"]
             saveTable.new_type = data["new_type"]
             saveTable.new_value = data["new_value"]
+            saveTable.new_datadriver_id = data["new_datadriver_id"]
 
         self.DataServer.session.commit()
         self.DataServer.session.close()

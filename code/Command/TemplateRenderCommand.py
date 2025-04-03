@@ -13,6 +13,9 @@ from objtyping import to_primitive
 import html
 import zipfile
 from flask import make_response
+from Command.DataDriverCommand import DataDriverCommand
+from DataDriver.DriverGuide.TemplateParamGuide import TemplateParamGuide
+from Common.DriverBase import DirverBase
 
 class TemplateRenderCommand(InitDataUtil):
 
@@ -32,6 +35,19 @@ class TemplateRenderCommand(InitDataUtil):
         params = {}
         if params_data != None and len(params_data) > 0:
             for p in params_data:
+                if p.new_datadriver_id not in (None, ""):
+                    # 获取驱动器基本信息
+                    driver = DataDriverCommand()._get(p.new_datadriver_id)
+                    # 获取驱动参数
+                    guide = TemplateParamGuide()
+                    driver_params = guide.get(p.new_datadriver_id, p.new_template_paramid)
+                    # 获取驱动实例
+                    driver_inst = DirverBase.get_driver(name=driver.type)()
+                    # 设置参数并执行
+                    driver_inst.DriverParams = driver_params
+                    driver_result = driver_inst.execute()
+                    # 处理驱动结果
+                    p.new_value = driver_result
                 if p.new_type == 1: # 文本
                     params[p.new_name] = p.new_value
                 elif p.new_type == 2: # 对象
@@ -58,6 +74,19 @@ class TemplateRenderCommand(InitDataUtil):
                     params = {}
                     if params_data != None and len(params_data) > 0:
                         for p in params_data:
+                            if p.new_datadriver_id not in (None, ""):
+                                # 获取驱动器基本信息
+                                driver = DataDriverCommand()._get(p.new_datadriver_id)
+                                # 获取驱动参数
+                                guide = TemplateParamGuide()
+                                driver_params = guide.get(p.new_datadriver_id, p.new_template_paramid)
+                                # 获取驱动实例
+                                driver_inst = DirverBase.get_driver(name=driver.type)()
+                                # 设置参数并执行
+                                driver_inst.DriverParams = driver_params
+                                driver_result = driver_inst.execute()
+                                # 处理驱动结果
+                                p.new_value = driver_result
                             if p.new_type == 1:  # 文本
                                 params[p.new_name] = p.new_value
                             elif p.new_type == 2:  # 对象

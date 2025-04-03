@@ -1,11 +1,9 @@
 #from __future__ import unicode_literals, absolute_import
-from sqlalchemy.orm import declarative_base
+from Models.Base import Base
 from sqlalchemy import Column, Integer, String, DateTime, MetaData
 from Common.Uuid import *
 from Common.DataUtil import *
 import datetime
-
-Base = declarative_base()
 
 class new_template_param(Base):
     __tablename__ = "new_template_param"
@@ -16,6 +14,7 @@ class new_template_param(Base):
     new_value = Column(String(length=255))
     new_template_group_id = Column(String(length=32))
     new_template_code_id = Column(String(length=32))
+    new_datadriver_id = Column(String(length=32))
     new_createdon = Column(DateTime, default=datetime.datetime.now)
     new_modifiedon = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 

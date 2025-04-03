@@ -12,12 +12,13 @@
           <el-menu-item index="/TemplateFilterList">过滤器</el-menu-item>
         </el-sub-menu>
 
-        <el-menu-item index="/">
-          <el-icon>
-            <setting />
-          </el-icon>
-          <template #title>设置</template>
-        </el-menu-item>
+        <el-sub-menu index="2">
+          <template #title>
+            <el-icon><setting /></el-icon>
+            <span>设置</span>
+          </template>
+          <el-menu-item index="/DataDriverList">数据驱动管理</el-menu-item>
+        </el-sub-menu>
       </el-menu>
     </el-aside>
     <el-main>

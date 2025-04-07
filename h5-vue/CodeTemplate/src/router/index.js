@@ -73,6 +73,30 @@ const router = createRouter({
             title: '过滤器编辑页'
           }
         },
+        {
+          path: '/DataDriverList',
+          name: 'DataDriverList',
+          component: () => import('../views/DataDriverList.vue'),
+          meta: {
+            title: '数据驱动列表页'
+          }
+        },
+        {
+          path: '/DataDriverEdit',
+          name: 'DataDriverEdit',
+          component: () => import('../views/DataDriverEdit.vue'),
+          meta: {
+            title: '数据驱动编辑页'
+          }
+        },
+        {
+          path: '/DataDriverCreate',
+          name: 'DataDriverCreate',
+          component: () => import('../views/DataDriverEdit.vue'),
+          meta: {
+            title: '数据驱动创建页'
+          }
+        },
       ]
     },
     {

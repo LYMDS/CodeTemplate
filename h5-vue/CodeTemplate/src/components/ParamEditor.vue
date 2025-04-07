@@ -9,20 +9,45 @@
       :row-class-name="tableRowClassName"
       row-key="new_template_paramid"
     >
-      <el-table-column type="selection" width="40"/>
+      <el-table-column type="selection" width="40" />
       <el-table-column type="expand" width="40">
         <template #default="scope">
           <div>
-          <el-input
-            type="textarea"
-            v-model="scope.row.new_value"
-            placeholder=""
-            clearable
-            style="width: 100%"
-            :spellcheck="false"
-          ></el-input>
-          <!-- v-model="scope.row.new_value" -->
-        </div>
+            <el-input
+              type="textarea"
+              v-model="scope.row.new_value"
+              placeholder=""
+              clearable
+              style="width: 100%"
+              :spellcheck="false"
+            ></el-input>
+
+            <el-form-item label="数据驱动器" style="margin-top: 10px;">
+              <el-select
+                v-model="scope.row.new_datadriver_id"
+                placeholder="Select Data Driver"
+                style="width: 240px"
+                filterable
+                clearable
+                @clear="scope.row.new_datadriver_id = ''"
+              >
+                <el-option
+                  v-for="item in datadriverOptions"
+                  :key="item.datadriverid"
+                  :label="item.name"
+                  :value="item.datadriverid"
+                />
+              </el-select>
+            </el-form-item>
+            <DataParameterEditor 
+              v-if="scope.row.new_datadriver_id"
+              :nature="2"
+              :datadriverid="id"
+              :templateparamid="scope.row.new_template_paramid"
+              style="padding: 8px; background-color: cadetblue;border-radius: 6px;"
+              :ref="el => dataParamEditors[scope.$index] = el"
+            ></DataParameterEditor>
+          </div>
         </template>
       </el-table-column>
       <el-table-column
@@ -69,7 +94,6 @@
           ></el-input>
         </template>
       </el-table-column>
-
       <el-table-column align="right">
         <template #header>
           <el-button
@@ -126,6 +150,7 @@ import {
   Finished,
 } from "@element-plus/icons-vue";
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
+import DataParameterEditor from "../components/DataParameterEditor.vue";
 
 const props = defineProps(["type", "id", "groupid"]);
 // type 1 => 模板级全局参数
@@ -157,12 +182,14 @@ var typeOptions = ref([
     value: 3,
   },
 ]);
+var datadriverOptions = ref([]);
 
 onMounted(() => {
   load();
 });
 
 function load() {
+  getDataDriver("");
   if (props.id && props.type == 1) {
     req
       .get(`/api/new_template_param/getlistbygroupid/?id=${props.id}`)
@@ -185,11 +212,10 @@ function load() {
         ElMessage.error(err);
       });
   }
-  
 }
 
-function DeepCopyTableData(){
-  originData.value = JSON.parse(JSON.stringify(tableData.value))
+function DeepCopyTableData() {
+  originData.value = JSON.parse(JSON.stringify(tableData.value));
 }
 
 const getLabel = (value) => {
@@ -203,29 +229,40 @@ function refreshLine() {
 }
 
 /**批量保存 */
+const dataParamEditors = ref([])
+
 function batchSave() {
   if (tableData.value && tableData.value.length > 0) {
-    var changeData = tableData.value.filter(r => checkRealChange(r, 
-    originData.value.find(o => o.new_template_paramid == r.new_template_paramid), 
-    ["new_name", "new_type", "new_value"]));
-    if (changeData && changeData.length > 0){
+    var changeData = tableData.value.filter((r) =>
+      checkRealChange(
+        r,
+        originData.value.find(
+          (o) => o.new_template_paramid == r.new_template_paramid
+        ),
+        ["new_name", "new_type", "new_value", "new_datadriver_id"]
+      )
+    );
+    if (changeData && changeData.length > 0) {
       req
-      .post("/api/new_template_param/batchsave/", tableData.value)
-      .then((res) => {
-        ElMessage.success("保存成功");
-        refreshLine();
-      })
-      .catch((err) => {
-        ElMessage.error(err);
-      });
-    }
-    else{
+        .post("/api/new_template_param/batchsave/", tableData.value)
+        .then((res) => {
+          ElMessage.success("保存成功");
+          refreshLine();
+          
+          // 新增触发子组件刷新逻辑
+          dataParamEditors.value.forEach(editor => {
+            if (editor?.load) editor.load()
+          })
+        })
+        .catch((err) => {
+          ElMessage.error(err);
+        });
+    } else {
       ElMessage.error("没有数据需要保存");
     }
+  } else {
+    ElMessage.error("没有数据需要保存");
   }
-  else{
-      ElMessage.error("没有数据需要保存");
-    }
 }
 
 function handleDelete() {
@@ -254,6 +291,7 @@ function createLine() {
     new_template_code_id: props.type == 2 ? props.id : "",
     new_template_group_id: props.type == 1 ? props.id : props.groupid,
     new_template_paramid: "",
+    new_datadriver_id: "",
     new_type: 1,
     new_value: "",
   });
@@ -276,19 +314,32 @@ function handleEdit(index, event) {
   dblclick(event);
 }
 
+/**获取数据驱动记录 */
+function getDataDriver(search) {
+  req
+    .get(`/api/datadriver/getlist/?search=${search}`)
+    .then((res) => {
+      datadriverOptions.value = res.data;
+    })
+    .catch((err) => {
+      ElMessage.error(err);
+    });
+}
+
 /**检查真实的脏数据
  * changeList 可能发生更改的字段
  */
 function checkRealChange(item, originItem, changeList) {
   if (!originItem) return true; // 新增数据
-    var change = false;
-    if (!changeList || changeList.length == 0) { alert("脏数据列表配置错误!"); }
-    changeList.forEach(c => {
-      change = change || item[c] != originItem[c];
-    }) // 是否有 有效字段被修改
-    return change;
+  var change = false;
+  if (!changeList || changeList.length == 0) {
+    alert("脏数据列表配置错误!");
+  }
+  changeList.forEach((c) => {
+    change = change || item[c] != originItem[c];
+  }); // 是否有 有效字段被修改
+  return change;
 }
-
 </script>
 <style>
 .el-table .local-parameters {

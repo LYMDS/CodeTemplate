@@ -12,8 +12,8 @@ test_params = {
     "obj": {
         'name': 'dysonliu'
     },
-    # 'name': '刘宇明',
-    'users': [{'username': '刘'},{'username': '宇'},{'username': '明'}]
+    # 'name': '',
+    'users': [{'username': ''},{'username': ''},{'username': ''}]
 }
 
 j = Jinja2Helper()
@@ -26,12 +26,4 @@ output = t.render(test_params)
 # j.load_with_extensions()
 #output = j.render_one("test", test_params)
 print(output)
-
-
-
-
-
-
-
-
 

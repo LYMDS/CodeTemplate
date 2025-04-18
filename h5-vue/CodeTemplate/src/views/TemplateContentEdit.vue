@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container v-loading="loading">
     <el-header>
       <el-button type="primary" round @click="save">保存</el-button>
       <el-button type="success" round @click="create">新建</el-button>
@@ -52,7 +52,7 @@
         </el-collapse-item>
       </el-collapse>
     </el-main>
-    <el-dialog v-model="dialogCodeVisible" :show-close="false" width="70%">
+    <el-dialog v-loading="loadingDialog" v-model="dialogCodeVisible" :show-close="false" width="70%">
       <template #header="{ close, titleId, titleClass }">
         <div class="my-header">
           <h4 :id="titleId" :class="titleClass">模板内容</h4>
@@ -122,7 +122,8 @@ import {
 } from "@element-plus/icons-vue";
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 import ParamEditor from "../components/ParamEditor.vue";
-
+var loading = ref(false);
+var loadingDialog = ref(false);
 const router = useRouter();
 var id = ref("");
 id.value = router.currentRoute.value.query.id;
@@ -158,12 +159,15 @@ onMounted(() => {
 /**加载数据 */
 function loadData() {
   if (id.value) {
+    loading.value = true;
     req
       .get(`/api/new_template_content/get/?id=${id.value}`)
       .then((res) => {
+        loading.value = false;
         formData.value = res.data;
       })
       .catch((err) => {
+        loading.value = false;
         console.error(err);
       });
   }
@@ -171,13 +175,16 @@ function loadData() {
 
 /**保存 */
 function save() {
+  loading.value = true;
   req
     .post("/api/new_template_content/save/", formData.value)
     .then((res) => {
+      loading.value = false;
       id.value = res.data;
       loadData();
     })
     .catch((err) => {
+      loading.value = false;
       console.error(err);
     });
 }
@@ -199,12 +206,15 @@ function create() {
 
 /**删除 */
 function del() {
+  loading.value = true;
   req
     .post("/api/new_template_content/delete/", [id.value])
     .then((res) => {
+      loading.value = false;
       back();
     })
     .catch((err) => {
+      loading.value = false;
       console.error(err);
     });
 }
@@ -232,29 +242,35 @@ function back() {
 
 /**生成当前文档并预览 */
 function render() {
+  loading.value = true;
   req
     .get(`/api/templaterender/template_content/?id=${id.value}`)
     .then((res) => {
+      loading.value = false;
       codeString.value = res.data;
       isrender.value = true;
       dialogCodeVisible.value = true;
     })
     .catch((err) => {
+      loading.value = false;
       ElMessage.error(err);
     });
 }
 
 /**预览当前模板 */
 function preview() {
+  loadingDialog.value = true;
   req
     .get(`/api/templaterender/preview_template_content/?id=${id.value}`)
     .then((res) => {
+      loadingDialog.value = false;
       codeString.value = res.data.replace(/\n/g, "<br/>");
       previeworedit.value = true;
       isrender.value = false;
       dialogCodeVisible.value = true;
     })
     .catch((err) => {
+      loadingDialog.value = false;
       ElMessage.error(err);
       // 报错后转编辑
       editcode();
@@ -265,28 +281,34 @@ function preview() {
 
 /**编辑代码 */
 function editcode() {
+  loadingDialog.value = true;
   req
     .get(`/api/templaterender/edit_template_content/?id=${id.value}`)
     .then((res) => {
+      loadingDialog.value = false;
       codeString.value = res.data; //.replace(/\n/g, "<br/>");
       previeworedit.value = false;
     })
     .catch((err) => {
+      loadingDialog.value = false;
       ElMessage.error(err);
     });
 }
 
 /**保存代码 */
 function savecode() {
+  loadingDialog.value = true;
   req
     .post("/api/new_template_content/savecode/", {
       content: codeString.value,
       id: id.value,
     })
     .then((res) => {
+      loadingDialog.value = false;
       ElMessage.success("保存成功");
     })
     .catch((err) => {
+      loadingDialog.value = false;
       ElMessage.error(err);
     });
 }

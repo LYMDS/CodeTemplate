@@ -1,5 +1,5 @@
 <template>
-    <el-container>
+    <el-container  v-loading="loading">
         <el-header>
             <el-button type="primary" round @click="refresh">刷新</el-button>
             <el-button type="success" round @click="create">新建</el-button>
@@ -30,6 +30,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from "vue-router";
 import req from '../common/interface'
 import { ElMessage, ElNotification, ElMessageBox } from 'element-plus';
+var loading = ref(false);
 const router = useRouter()
 var tableRef = ref();
 var tableData = ref([]);
@@ -42,9 +43,12 @@ onMounted(() => {
 
 /**获取数据 */
 function getData() {
+    loading.value = true;
     req.get(`/api/datadriver/getlist/?search=${searchStr.value}`).then(res => {
         tableData.value = res.data;
+        loading.value = false;
     }).catch(err => {
+        loading.value = false;
         console.error(err);
     })
 }
@@ -93,11 +97,14 @@ function del() {
             cancelButtonText: "取消",
             type: "warning",
         }).then(() => {
+            loading.value = true;
             var deleteIds = selectedList.map(s => s.datadriverid);
             req.post("/api/datadriver/delete/", deleteIds).then(res => {
+                loading.value = false;
                 getData();
                 ElMessage.success("删除成功!")
             }).catch(err => {
+                loading.value = false;
                 ElMessage.error(err)
             });
         }).catch(() => {

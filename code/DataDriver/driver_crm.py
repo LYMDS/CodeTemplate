@@ -14,5 +14,16 @@ class DriverCrm(DirverBase):
         # 导入 C# 中的命名空间和类
         from DriverCrm import DataDriverCrm
         # 调用 C# 类中的方法
-        DataDriverCrm.crmConnectionString = self.DriverParams["CrmConnectionString"]
+        DataDriverCrm.crmConnectionString = self.getCrmConnectionString()
         return DataDriverCrm.excute(self.DriverParams["EntityName"])
+
+    def getCrmConnectionString(self):
+        paramsList = ["AuthType", "Server", "Domain", "Password", "UserName", "ClientId", "ClientSecret"]
+        CrmConnectionString = ""
+        for p in paramsList:
+            if self.DriverParams[p] != "":
+                CrmConnectionString += f"{p}={self.DriverParams[p]};"
+        CrmConnectionString = CrmConnectionString[:-1]
+        print(CrmConnectionString)
+        return CrmConnectionString
+

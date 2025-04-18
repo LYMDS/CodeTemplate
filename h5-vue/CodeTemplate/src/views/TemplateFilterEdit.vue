@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container v-loading="loading">
     <el-header>
       <el-button type="primary" round @click="save">保存</el-button>
       <el-button type="danger" round @click="del">删除</el-button>
@@ -71,6 +71,7 @@ import req from "../common/interface";
 import { useRouter } from "vue-router";
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 import { Plus, RefreshRight } from "@element-plus/icons-vue";
+var loading = ref(false);
 const router = useRouter();
 var id = ref("");
 
@@ -91,12 +92,15 @@ onMounted(() => {
 /**加载数据 */
 function loadData() {
   if (id.value) {
+    loading.value = true;
     req
       .get(`/api/new_filter/get/?id=${id.value}`)
       .then((res) => {
+        loading.value = false;
         formData.value = res.data;
       })
       .catch((err) => {
+        loading.value = false;
         console.error(err);
       });
   }
@@ -104,14 +108,17 @@ function loadData() {
 
 /**保存 */
 function save() {
+  loading.value = true;
   req
     .post("/api/new_filter/save/", formData.value)
     .then((res) => {
+      loading.value = false;
       id.value = res.data;
       ElMessage.success("保存成功!");
       loadData();
     })
     .catch((err) => {
+      loading.value = false;
       console.error(err);
     });
 }
@@ -131,12 +138,15 @@ function create() {
 
 /**删除 */
 function del() {
+  loading.value = true;
   req
     .post("/api/new_filter/delete/", [id.value])
     .then((res) => {
+      loading.value = false;
       back();
     })
     .catch((err) => {
+      loading.value = false;
       console.error(err);
     });
 }

@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-table
+      v-loading="loading"
       v-show="id"
       ref="tableRef"
       :data="tableData"
@@ -155,6 +156,7 @@ import DataParameterEditor from "../components/DataParameterEditor.vue";
 const props = defineProps(["type", "id", "groupid"]);
 // type 1 => 模板级全局参数
 // type 2 => 文件级局部参数
+var loading = ref(false);
 const router = useRouter();
 // 表格数据
 const tableData = ref([]);
@@ -191,24 +193,30 @@ onMounted(() => {
 function load() {
   getDataDriver("");
   if (props.id && props.type == 1) {
+    loading.value = true;
     req
       .get(`/api/new_template_param/getlistbygroupid/?id=${props.id}`)
       .then((res) => {
+        loading.value = false;
         tableData.value = res.data;
         DeepCopyTableData();
       })
       .catch((err) => {
+        loading.value = false;
         ElMessage.error(err);
       });
   }
   if (props.id && props.type == 2) {
+    loading.value = true;
     req
       .get(`/api/new_template_param/getlistbycontentid/?id=${props.id}`)
       .then((res) => {
+        loading.value = false;
         tableData.value = res.data;
         DeepCopyTableData();
       })
       .catch((err) => {
+        loading.value = false;
         ElMessage.error(err);
       });
   }
@@ -243,9 +251,11 @@ function batchSave() {
       )
     );
     if (changeData && changeData.length > 0) {
+      loading.value = true;
       req
         .post("/api/new_template_param/batchsave/", tableData.value)
         .then((res) => {
+          loading.value = false;
           ElMessage.success("保存成功");
           refreshLine();
           
@@ -255,6 +265,7 @@ function batchSave() {
           })
         })
         .catch((err) => {
+          loading.value = false;
           ElMessage.error(err);
         });
     } else {
@@ -268,16 +279,19 @@ function batchSave() {
 function handleDelete() {
   const selectionRows = tableRef.value.getSelectionRows();
   if (selectionRows.length > 0) {
+    loading.value = true;
     req
       .post(
         "/api/new_template_param/delete/",
         selectionRows.map((s) => s.new_template_paramid)
       )
       .then((res) => {
+        loading.value = false;
         ElMessage.success("删除成功");
         load();
       })
       .catch((err) => {
+        loading.value = false;
         ElMessage.error(err);
       });
   }

@@ -14,7 +14,7 @@ def new_datadriver_id_set(target, value, oldvalue, initiator):
     dataparameter_command.DataServer.session = session
     need_delete = dataparameter_command._getlist_by_templateparamid(target.new_template_paramid)
 
-    if need_delete != None and len(need_delete) > 0:
+    if value != oldvalue and need_delete != None and len(need_delete) > 0:
         dataparameter_command._delete([d.dataparameterid for d in need_delete])
 
     if value != "" and value != oldvalue:

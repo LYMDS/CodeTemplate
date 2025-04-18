@@ -1,6 +1,7 @@
 <template>
   <div>
-    <el-table
+    <el-table 
+      v-loading="loading"
       ref="tableRef"
       :data="tableData"
       style="width: 100%"
@@ -53,6 +54,7 @@ import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 const props = defineProps(["nature", "datadriverid", "templateparamid"]);
 // nature 1 => 驱动基数参数
 // nature 2 => 驱动执行参数
+const loading = ref(false);
 const router = useRouter();
 // 表格数据
 const tableData = ref([]);
@@ -82,24 +84,30 @@ onMounted(() => {
 function load() {
   debugger;
   if (props.datadriverid && props.nature == 1) {
+    loading.value = true;
     req
       .get(`/api/dataparameter/getlistbydatadriverid/?id=${props.datadriverid}`)
       .then((res) => {
+        loading.value = false;
         tableData.value = res.data;
         DeepCopyTableData();
       })
       .catch((err) => {
+        loading.value = false;
         ElMessage.error(err);
       });
   }
   if (props.templateparamid && props.nature == 2) {
+    loading.value = true;
     req
       .get(`/api/dataparameter/getlistbytemplateparamid/?id=${props.templateparamid}`)
       .then((res) => {
+        loading.value = false;
         tableData.value = res.data;
         DeepCopyTableData();
       })
       .catch((err) => {
+        loading.value = false;
         ElMessage.error(err);
       });
   }
@@ -127,13 +135,16 @@ function batchSave() {
       )
     );
     if (changeData && changeData.length > 0) {
+      loading.value = true;
       req
         .post("/api/dataparameter/batchsave/", tableData.value)
         .then((res) => {
+          loading.value = false;
           ElMessage.success("保存成功");
           load();
         })
         .catch((err) => {
+          loading.value = false;
           ElMessage.error(err);
         });
     } else {

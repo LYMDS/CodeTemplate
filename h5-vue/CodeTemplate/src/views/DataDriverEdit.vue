@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container v-loading="loading">
     <el-header>
       <el-button type="primary" round @click="create">新建</el-button>
       <el-button type="primary" round @click="save">保存</el-button>
@@ -99,6 +99,7 @@ import { useRouter } from "vue-router";
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 import { Plus, RefreshRight } from "@element-plus/icons-vue";
 import DataParameterEditor from "../components/DataParameterEditor.vue";
+var loading = ref(false);
 const router = useRouter();
 var id = ref("");
 
@@ -123,12 +124,15 @@ onMounted(() => {
 /**加载数据 */
 function loadData() {
   if (id.value) {
+    loading.value = true;
     req
       .get(`/api/datadriver/get/?id=${id.value}`)
       .then((res) => {
+        loading.value = false;
         formData.value = res.data;
       })
       .catch((err) => {
+        loading.value = false;
         console.error(err);
       });
   }
@@ -148,12 +152,22 @@ function getTypeOptionSet() {
 
 /**保存 */
 function save() {
+  loading.value = true;
   req
     .post("/api/datadriver/save/", formData.value)
     .then((res) => {
+      loading.value = false;
       id.value = res.data;
       ElMessage.success("保存成功!");
-      loadData();
+      if (router.currentRoute.value.name == "DataDriverCreate") {
+        router.push({
+          name: "DataDriverEdit",
+          query: { id: id.value },
+        });
+      } else {
+        loadData();
+      }
+      
       // dataparametereditorRef.value.props.datadriverid = id.value;
       // dataparametereditorRef.value.load();
       
@@ -169,12 +183,15 @@ function create() {
 
 /**删除 */
 function del() {
+  loading.value = true;
   req
     .post("/api/datadriver/delete/", [id.value])
     .then((res) => {
+      loading.value = false;
       back();
     })
     .catch((err) => {
+      loading.value = false;
       console.error(err);
     });
 }

@@ -25,8 +25,13 @@ class TemplateParamGuide_driver_crm_ParamInit(DirverParamInitBase):
 
     def CreateBaseParam(self, datadriverid):
         paramList = [
-            CreateDataParameter("CrmConnectionString", "CRM连接字符串", 1, 1,
-                                datadriverid, None),
+            CreateDataParameter("Server", "Server", 1, 1, datadriverid, None),
+            CreateDataParameter("AuthType", "AuthType", 1, 1, datadriverid, None),
+            CreateDataParameter("Domain", "Domain", 1, 1, datadriverid, None),
+            CreateDataParameter("UserName", "UserName", 1, 1, datadriverid, None),
+            CreateDataParameter("Password", "Password", 1, 1, datadriverid, None),
+            CreateDataParameter("ClientId", "ClientId", 1, 1, datadriverid, None),
+            CreateDataParameter("ClientSecret", "ClientSecret", 1, 1, datadriverid, None)
         ]
         for param in paramList:
             self.session.add(param)
@@ -82,3 +87,29 @@ class TemplateParamGuide_driver_sqlserver_ParamInit(DirverParamInitBase):
         #self.session.close()
 
 
+class TemplateParamGuide_driver_excel_ParamInit(DirverParamInitBase):
+    GuideName = "Template Param Data Guide"
+    DriverName = "Excel"
+
+    def __init__(self, session):
+        # self.session = Session(bind=connection)
+        self.session = session
+
+    def CreateBaseParam(self, datadriverid):
+        paramList = [
+
+        ]
+        for param in paramList:
+            self.session.add(param)
+        self.session.commit()
+        self.session.close()
+
+    def CreateExecParam(self, datadriverid, templateparamid):
+        paramList = [
+            CreateDataParameter("xlsx_path", "Excel路径", 3, 2, datadriverid, templateparamid),
+            CreateDataParameter("sheet_name", "Sheet页名", 1, 2, datadriverid, templateparamid),
+        ]
+        for param in paramList:
+            self.session.add(param)
+        self.session.commit()
+        # self.session.close()

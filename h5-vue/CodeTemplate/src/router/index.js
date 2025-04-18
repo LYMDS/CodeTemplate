@@ -66,6 +66,14 @@ const router = createRouter({
           }
         },
         {
+          path: '/TemplateFilterCreate',
+          name: 'TemplateFilterCreate',
+          component: () => import('../views/TemplateFilterEdit.vue'),
+          meta: {
+            title: '过滤器新建页'
+          }
+        },
+        {
           path: '/TemplateFilterEdit',
           name: 'TemplateFilterEdit',
           component: () => import('../views/TemplateFilterEdit.vue'),

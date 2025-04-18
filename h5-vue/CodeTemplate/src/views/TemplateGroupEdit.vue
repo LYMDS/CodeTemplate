@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container v-loading="loading">
     <el-header>
       <el-button type="primary" round @click="save">保存</el-button>
       <el-button type="success" round @click="create">新建</el-button>
@@ -39,6 +39,7 @@
             :data="tableData"
             style="width: 100%"
             @row-dblclick="dblclick"
+            v-loading="loadingLine"
           >
             <el-table-column type="selection" width="55" />
             <el-table-column prop="new_file_name" label="文件名" width="180" />
@@ -108,6 +109,8 @@ import { useRouter } from "vue-router";
 import { Plus, RefreshRight } from "@element-plus/icons-vue";
 import { ElLoading } from 'element-plus'
 import ParamEditor from "../components/ParamEditor.vue";
+var loading = ref(false);
+var loadingLine = ref(false);
 const router = useRouter();
 var id = ref("");
 id.value = router.currentRoute.value.query.id;
@@ -129,12 +132,15 @@ onMounted(() => {
 /**加载数据 */
 function loadData() {
   if (id.value) {
+    loading.value = true;
     req
       .get(`/api/new_template_group/get/?id=${id.value}`)
       .then((res) => {
+        loading.value = false;
         formData.value = res.data;
       })
       .catch((err) => {
+        loading.value = false;
         console.error(err);
       });
   }
@@ -143,12 +149,15 @@ function loadData() {
 /**加载明细 */
 function loadLine() {
   if (id.value) {
+    loadingLine.value = true;
     req
       .get(`/api/new_template_content/getlistbygroupid/?id=${id.value}`)
       .then((res) => {
+        loadingLine.value = false;
         tableData.value = res.data;
       })
       .catch((err) => {
+        loadingLine.value = false;
         console.error(err);
       });
   }
@@ -156,13 +165,16 @@ function loadLine() {
 
 /**保存 */
 function save() {
+  loading.value = true;
   req
     .post("/api/new_template_group/save/", formData.value)
     .then((res) => {
+      loading.value = false;
       id.value = res.data;
       loadData();
     })
     .catch((err) => {
+      loading.value = false;
       console.error(err);
     });
 }
@@ -182,26 +194,29 @@ function create() {
 
 /**生成文档 */
 function render() {
-  const loading = ElLoading.service()
+  loading.value = true;
   req
     .get(`/api/templaterender/template_group/?id=${id.value}`)
     .then((res) => {
-      loading.close()
+      loading.value = false;
     })
     .catch((err) => {
-      loading.close()
+      loading.value = false;
       ElMessage.error(err);
     });
 }
 
 /**删除 */
 function del() {
+  loading.value = true;
   req
     .post("/api/new_template_group/delete/", [id.value])
     .then((res) => {
+      loading.value = false;
       back();
     })
     .catch((err) => {
+      loading.value = false;
       console.error(err);
     });
 }

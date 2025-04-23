@@ -1,5 +1,5 @@
 <template>
-    <el-container>
+    <el-container v-loading="loading">
       <el-header>
         <el-button type="primary" round @click="save">保存</el-button>
         <el-button type="success" round @click="create">新建</el-button>
@@ -56,7 +56,7 @@
   import { useRouter } from "vue-router";
   import { RefreshRight, Plus } from "@element-plus/icons-vue";
   import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
-  
+  var loading = ref(false);
   const router = useRouter();
   var id = ref("");
   var new_template_group_id = ref("");
@@ -107,12 +107,15 @@
   /**加载数据 */
   function loadData() {
     if (id.value) {
+      loading.value = true;
       req
         .get(`/api/new_template_param/get/?id=${id.value}`)
         .then((res) => {
+          loading.value = false;
           formData.value = res.data;
         })
         .catch((err) => {
+          loading.value = false;
           console.error(err);
         });
     }
@@ -121,13 +124,16 @@
   
   /**保存 */
   function save() {
+    loading.value = true;
     req
       .post("/api/new_template_param/save/", formData.value)
       .then((res) => {
+        loading.value = false;
         id.value = res.data;
         loadData();
       })
       .catch((err) => {
+        loading.value = false;
         console.error(err);
       });
   }
@@ -150,10 +156,13 @@
   
   /**删除 */
   function del() {
+    loading.value = true;
     req.post("/api/new_template_param/delete/", [id.value]).then(res => {
-        back();
+      loading.value = false;
+      back();
     }).catch(err => {
-        console.error(err);
+      loading.value = false;
+      console.error(err);
     });
   }
   
